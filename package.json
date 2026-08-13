@@ -1,0 +1,27 @@
+{
+  "name": "bot-review",
+  "module": "src/main.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run src/main.ts",
+    "check": "tsc --noEmit",
+    "lint": "biome check src test",
+    "format": "biome format --write src test",
+    "test": "bun test",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.8",
+    "@types/bun": "latest",
+    "knip": "^5.88.1",
+    "madge": "^8.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@effect/platform-bun": "^4.0.0-rc.108",
+    "effect": "^4.0.0-rc.108"
+  }
+}

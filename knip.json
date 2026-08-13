@@ -1,0 +1,7 @@
+{
+  "$schema": "https://unpkg.com/knip@5.0.0/schema.json",
+  "ignoreDependencies": ["madge", "knip"],
+  "ignoreBinaries": ["tsc", "bunx", "biome"],
+  "ignoreExportsUsedInFile": true,
+  "ignore": ["test/run-build-check.ts"]
+}

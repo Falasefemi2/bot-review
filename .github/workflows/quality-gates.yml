@@ -1,0 +1,122 @@
+name: CI Quality Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  RESULT_DIR: bot-results
+  COVERAGE_THRESHOLD: "80"
+  RUN_INTEGRATION: "false"
+  INTEGRATION_TEST_PATH: test/integration
+  LICENSE_SCAN_ENABLED: "false"
+  AI_REVIEW_BLOCKING: "false"
+  GROQ_BASE_URL: https://api.groq.com/openai/v1
+  GROQ_MODEL: llama-3.3-70b-versatile
+  AI_MAX_DIFF_CHARS: "20000"
+
+jobs:
+  static:
+    name: Static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run src/main.ts
+        env:
+          CHECK_JOB: static
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-static
+          path: ${{ env.RESULT_DIR }}/static.json
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run src/main.ts
+        env:
+          CHECK_JOB: tests
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-tests
+          path: ${{ env.RESULT_DIR }}/tests.json
+
+  deps:
+    name: Dependencies, build & security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Install gitleaks & semgrep
+        run: |
+          go install github.com/gitleaks/gitleaks/v8@latest
+          sudo pipx install semgrep
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - run: bun run src/main.ts
+        env:
+          CHECK_JOB: deps
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-deps
+          path: ${{ env.RESULT_DIR }}/deps.json
+
+  ai:
+    name: AI review (advisory)
+    runs-on: ubuntu-latest
+    needs: [static]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run src/main.ts
+        env:
+          CHECK_JOB: ai
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-ai
+          path: ${{ env.RESULT_DIR }}/ai.json
+
+  report:
+    name: Report & check-run status
+    runs-on: ubuntu-latest
+    needs: [static, tests, deps, ai]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          path: ${{ env.RESULT_DIR }}
+          merge-multiple: true
+          pattern: results-*
+          if-no-files-found: ignore
+      - run: bun run src/main.ts
+        env:
+          CHECK_JOB: report
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
