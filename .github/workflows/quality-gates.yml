@@ -68,7 +68,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Install gitleaks & semgrep
         run: |
-          go install github.com/gitleaks/gitleaks/v8@latest
+          go install github.com/zricethezav/gitleaks/v8@latest
           sudo pipx install semgrep
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
       - run: bun run src/main.ts
