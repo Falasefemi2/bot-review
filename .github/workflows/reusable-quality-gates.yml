@@ -66,14 +66,14 @@ jobs:
         with:
           repository: ${{ inputs.bot-repository }}
           ref: ${{ inputs.bot-ref }}
-          path: bot-review
+          path: ../bot-review
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ inputs.bun-version }}
       - run: bun install
       - run: bun install --frozen-lockfile
-        working-directory: bot-review
-      - run: bun run bot-review/src/main.ts
+        working-directory: ../bot-review
+      - run: bun run ../bot-review/src/main.ts
         env:
           CHECK_JOB: static
       - uses: actions/upload-artifact@v4
@@ -90,14 +90,14 @@ jobs:
         with:
           repository: ${{ inputs.bot-repository }}
           ref: ${{ inputs.bot-ref }}
-          path: bot-review
+          path: ../bot-review
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ inputs.bun-version }}
       - run: bun install
       - run: bun install --frozen-lockfile
-        working-directory: bot-review
-      - run: bun run bot-review/src/main.ts
+        working-directory: ../bot-review
+      - run: bun run ../bot-review/src/main.ts
         env:
           CHECK_JOB: tests
       - uses: actions/upload-artifact@v4
@@ -114,19 +114,19 @@ jobs:
         with:
           repository: ${{ inputs.bot-repository }}
           ref: ${{ inputs.bot-ref }}
-          path: bot-review
+          path: ../bot-review
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ inputs.bun-version }}
       - run: bun install
       - run: bun install --frozen-lockfile
-        working-directory: bot-review
+        working-directory: ../bot-review
       - name: Install gitleaks & semgrep
         run: |
           go install github.com/zricethezav/gitleaks/v8@latest
           sudo pipx install semgrep
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
-      - run: bun run bot-review/src/main.ts
+      - run: bun run ../bot-review/src/main.ts
         env:
           CHECK_JOB: deps
       - uses: actions/upload-artifact@v4
@@ -146,14 +146,14 @@ jobs:
         with:
           repository: ${{ inputs.bot-repository }}
           ref: ${{ inputs.bot-ref }}
-          path: bot-review
+          path: ../bot-review
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ inputs.bun-version }}
       - run: bun install
       - run: bun install --frozen-lockfile
-        working-directory: bot-review
-      - run: bun run bot-review/src/main.ts
+        working-directory: ../bot-review
+      - run: bun run ../bot-review/src/main.ts
         env:
           CHECK_JOB: ai
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -173,20 +173,20 @@ jobs:
         with:
           repository: ${{ inputs.bot-repository }}
           ref: ${{ inputs.bot-ref }}
-          path: bot-review
+          path: ../bot-review
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ inputs.bun-version }}
       - run: bun install
       - run: bun install --frozen-lockfile
-        working-directory: bot-review
+        working-directory: ../bot-review
       - uses: actions/download-artifact@v4
         with:
           path: ${{ env.RESULT_DIR }}
           merge-multiple: true
           pattern: results-*
           if-no-files-found: ignore
-      - run: bun run bot-review/src/main.ts
+      - run: bun run ../bot-review/src/main.ts
         env:
           CHECK_JOB: report
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
